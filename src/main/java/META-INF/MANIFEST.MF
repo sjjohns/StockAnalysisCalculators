@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Class-Path: findbugs-annotations-3.0.1.jar commons-math3-3.6.1.jar sca
+ la-actors-2.11.0.jar scala-actors-migration_2.11-1.1.0.jar scala-libr
+ ary.jar scala-parser-combinators_2.11-1.0.4.jar scala-reflect.jar sca
+ la-swing_2.11-1.0.2.jar scala-xml_2.11-1.0.4.jar slf4j-simple-1.7.22.
+ jar slf4j-api-1.7.22.jar
+Main-Class: 
+
