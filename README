@@ -1,0 +1,12 @@
+Stock Analysis Calculators is a Java library for calculating certain technical metrics on a
+stock.  Metrics include:
+
+* 50- and 200-Day Simple Moving Averages
+* Average True Range (ATR) 
+* Average Share Volume
+* Up/Down Volume Ratio
+* Weeks Tight Patterns and Buy Points
+
+The complete source code is available on GitHub: 
+
+https://github.com/sjjohns/StockAnalysisCalculators
