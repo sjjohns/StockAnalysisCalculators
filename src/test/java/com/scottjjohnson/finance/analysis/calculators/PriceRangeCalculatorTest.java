@@ -19,7 +19,7 @@ package com.scottjjohnson.finance.analysis.calculators;
 import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
 import com.scottjjohnson.finance.analysis.beans.PriceRangeBean;
 import com.scottjjohnson.finance.analysis.helpers.QuotesHelper;
-import com.scottjjohnson.finance.analysis.parsers.YahooFinanceParser;
+import com.scottjjohnson.finance.analysis.parsers.GoogleFinanceParser;
 import com.scottjjohnson.finance.analysis.testdata.FinanceTestData;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -47,7 +47,7 @@ public class PriceRangeCalculatorTest {
 
     @Before
     public void setUp() throws Exception {
-        quotes = new YahooFinanceParser(FinanceTestData.JSON_WITH_SPLIT2).parse();
+        quotes = new GoogleFinanceParser("XXX", FinanceTestData.GOOGLE_QUOTES_CSV_AAPL_WITH_SPLIT2).parse();
         QuotesHelper.sortQuoteListByDate(quotes);
     }
 
@@ -59,11 +59,11 @@ public class PriceRangeCalculatorTest {
     @Test
     public void testCalculate() {
 
-        double allowableError = 0.0000001d;
-        double correctAnswerMaxPrice = 98.9447205d;
+        double allowableError = 0.00d;
+        double correctAnswerMaxPrice = 99.44d;
         Date correctAnswerMaxPriceDate = new Date(1406606400000L); // Tue Jul 29 00:00:00 EDT 2014
 
-        double correctAnswerMinPrice = 85.8694024d;
+        double correctAnswerMinPrice = 86.30d;
         Date correctAnswerMinPriceDate = new Date(1400731200000L); // Thu May 22 00:00:00 EDT 2014
 
         PriceRangeBean calculatedAnswer = new PriceRangeCalculator().calculate(quotes);

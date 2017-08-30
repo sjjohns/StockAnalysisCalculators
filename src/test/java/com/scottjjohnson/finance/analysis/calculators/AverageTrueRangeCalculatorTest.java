@@ -18,7 +18,7 @@ package com.scottjjohnson.finance.analysis.calculators;
 
 import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
 import com.scottjjohnson.finance.analysis.helpers.QuotesHelper;
-import com.scottjjohnson.finance.analysis.parsers.YahooFinanceParser;
+import com.scottjjohnson.finance.analysis.parsers.GoogleFinanceParser;
 import com.scottjjohnson.finance.analysis.testdata.FinanceTestData;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-public class AveragePercentRangeCalculatorTest {
+public class AverageTrueRangeCalculatorTest {
 
     private List<DailyQuoteBean> quotes = null;
 
@@ -45,7 +45,7 @@ public class AveragePercentRangeCalculatorTest {
     @Before
     public void setUp() throws Exception {
 
-        quotes = new YahooFinanceParser(FinanceTestData.JSON_WITH_SPLIT2).parse();
+        quotes = new GoogleFinanceParser("XXX", FinanceTestData.GOOGLE_QUOTES_CSV_AAPL_WITH_SPLIT2).parse();
 
         QuotesHelper.sortQuoteListByDate(quotes);
     }
@@ -58,9 +58,9 @@ public class AveragePercentRangeCalculatorTest {
     @Test
     public void testCalculate() {
 
-        double allowableError = 0.000000001d;
-        double correctAnswer = 0.015559517d;
-        double calculatedAnswer = new AveragePercentRangeCalculator().calculate(quotes, 14);
+        double allowableError = 0.0000001d;
+        double correctAnswer = 1.5457143d;
+        double calculatedAnswer = new AverageTrueRangeCalculator().calculate(quotes, 14);
         double deviation = Math.abs(correctAnswer - calculatedAnswer);
 
         assertTrue(
@@ -72,11 +72,11 @@ public class AveragePercentRangeCalculatorTest {
     public void testCalculateUsingSmallQuoteArray() {
 
         double allowableError = 0.0000001d;
-        double correctAnswer = 0.0141062d;
+        double correctAnswer = 1.2433333d;
 
         quotes = quotes.subList(0, 4); // trim the quotes list to be smaller than the number of days
 
-        double calculatedAnswer = new AveragePercentRangeCalculator().calculate(quotes, 14);
+        double calculatedAnswer = new AverageTrueRangeCalculator().calculate(quotes, 14);
         double deviation = Math.abs(correctAnswer - calculatedAnswer);
 
         assertTrue(

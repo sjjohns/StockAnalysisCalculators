@@ -27,7 +27,7 @@ import scala.language.postfixOps
   * @see http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:average_true_range_atr
   *
   */
-class AveragePercentRangeCalculator {
+class AverageTrueRangeCalculator {
 
     /**
       * Calculates the average true range
@@ -57,11 +57,21 @@ class AveragePercentRangeCalculator {
 
     private def calculateDayRange(quote: DailyQuoteBean, previousQuote: DailyQuoteBean): Double = {
 
-        val highLowRange = quote.getAdjustedHigh - quote.getAdjustedLow
-        val highPreviousCloseRange = quote.getAdjustedHigh - previousQuote.getAdjustedClose
-        val lowPreviousCloseRange = quote.getAdjustedLow - previousQuote.getAdjustedClose
+        // google is missing some open/high/low values so assume day's range is the difference is closing prices
+        if (quote.getAdjustedHigh == -9999 || quote.getAdjustedLow == -9999) {
 
-        math.max(highLowRange, math.max(highPreviousCloseRange, lowPreviousCloseRange)) / previousQuote.getAdjustedClose
+            math.abs(quote.getAdjustedClose - previousQuote.getAdjustedClose)
+
+        } else {
+
+            val highLowRange = quote.getAdjustedHigh - quote.getAdjustedLow
+            val highPreviousCloseRange = math.abs(quote.getAdjustedHigh - previousQuote.getAdjustedClose)
+            val lowPreviousCloseRange = math.abs(quote.getAdjustedLow - previousQuote.getAdjustedClose)
+
+            math.max(highLowRange, math.max(highPreviousCloseRange, lowPreviousCloseRange))
+
+        }
+
     }
 
 }

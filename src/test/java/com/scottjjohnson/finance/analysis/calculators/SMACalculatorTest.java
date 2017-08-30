@@ -18,7 +18,7 @@ package com.scottjjohnson.finance.analysis.calculators;
 
 import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
 import com.scottjjohnson.finance.analysis.helpers.QuotesHelper;
-import com.scottjjohnson.finance.analysis.parsers.YahooFinanceParser;
+import com.scottjjohnson.finance.analysis.parsers.GoogleFinanceParser;
 import com.scottjjohnson.finance.analysis.testdata.FinanceTestData;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -44,7 +44,7 @@ public class SMACalculatorTest {
 
     @Before
     public void setUp() throws Exception {
-        quotes = new YahooFinanceParser(FinanceTestData.JSON_WITH_SPLIT2).parse();
+        quotes = new GoogleFinanceParser("XXX", FinanceTestData.GOOGLE_QUOTES_CSV_AAPL_WITH_SPLIT2).parse();
         QuotesHelper.sortQuoteListByDate(quotes);
     }
 
@@ -57,7 +57,7 @@ public class SMACalculatorTest {
     public void testCalculateDailySMA() {
 
         double allowableError = 0.00001d;
-        double correctAnswer = 93.49020d;
+        double correctAnswer = 93.8964d;
         double calculatedAnswer = new SMACalculator().calculate(quotes, 50);
         double deviation = Math.abs(correctAnswer - calculatedAnswer);
 
@@ -69,7 +69,7 @@ public class SMACalculatorTest {
     public void testCalculate() {
 
         double allowableError = 0.00001d;
-        double correctAnswer = 87.81250d;
+        double correctAnswer = 88.25d;
 
         quotes = quotes.subList(0, 4);
 

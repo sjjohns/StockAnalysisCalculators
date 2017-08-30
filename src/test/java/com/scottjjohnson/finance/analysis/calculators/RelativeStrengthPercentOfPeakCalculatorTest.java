@@ -18,7 +18,7 @@ package com.scottjjohnson.finance.analysis.calculators;
 
 import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
 import com.scottjjohnson.finance.analysis.helpers.QuotesHelper;
-import com.scottjjohnson.finance.analysis.parsers.YahooFinanceParser;
+import com.scottjjohnson.finance.analysis.parsers.GoogleFinanceParser;
 import com.scottjjohnson.finance.analysis.testdata.ComparisonQuotesTestData;
 import com.scottjjohnson.finance.analysis.testdata.FinanceTestData;
 import com.scottjjohnson.finance.analysis.util.DateParser;
@@ -54,7 +54,7 @@ public class RelativeStrengthPercentOfPeakCalculatorTest {
 
     @Before
     public void setUp() throws Exception {
-        quotes = new YahooFinanceParser(FinanceTestData.JSON_WITH_SPLIT2).parse();
+        quotes = new GoogleFinanceParser("XXX", FinanceTestData.GOOGLE_QUOTES_CSV_AAPL_WITH_SPLIT2).parse();
         QuotesHelper.sortQuoteListByDate(quotes);
 
         comparisonQuotes = ComparisonQuotesTestData.getTestData();
@@ -70,8 +70,8 @@ public class RelativeStrengthPercentOfPeakCalculatorTest {
     public void testCalculate() {
 
         int yearsToCalculate = 100; // for this test, use whatever data is available in the test array
-        double allowableError = 0.0000001d;
-        double correctAnswer = 0.9850902d;
+        double allowableError = 0.000001d;
+        double correctAnswer = 0.979354d;
         double calculatedAnswer = new RelativeStrengthPercentOfPeakCalculator().calculate(quotes, comparisonQuotes,
                 yearsToCalculate);
         double deviation = Math.abs(correctAnswer - calculatedAnswer);
@@ -87,8 +87,8 @@ public class RelativeStrengthPercentOfPeakCalculatorTest {
         comparisonQuotes.remove(dateToRemoveFromComparisonQuotes);
 
         int yearsToCalculate = 100; // for this test, use whatever data is available in the test array
-        double allowableError = 0.0000001d;
-        double correctAnswer = 0.9850902d;
+        double allowableError = 0.000001d;
+        double correctAnswer = 0.979354d;
         double calculatedAnswer = new RelativeStrengthPercentOfPeakCalculator().calculate(quotes, comparisonQuotes,
                 yearsToCalculate);
         double deviation = Math.abs(correctAnswer - calculatedAnswer);
@@ -115,8 +115,8 @@ public class RelativeStrengthPercentOfPeakCalculatorTest {
         adjustComparisonQuoteDatesForCalculateWithDateFilterTest(dateOffset);
 
         int yearsToCalculate = 1;
-        double allowableError = 0.0000001d;
-        double correctAnswer = 0.9986170d;
+        double allowableError = 0.000001d;
+        double correctAnswer = 0.998217d;
         double calculatedAnswer = new RelativeStrengthPercentOfPeakCalculator().calculate(quotes, comparisonQuotes,
                 yearsToCalculate);
         double deviation = Math.abs(correctAnswer - calculatedAnswer);

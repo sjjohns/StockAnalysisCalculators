@@ -137,7 +137,7 @@ class WeeksTightCalculator {
         }
 
 
-        if (wt != null && minClosePriceAfterCurrentWeek < wt.getLowestPrice()) {
+        if (wt != null && minClosePriceAfterCurrentWeek < wt.getLowestPrice) {
             wt = null
         }
 
@@ -163,12 +163,12 @@ class WeeksTightCalculator {
         var d = 0.0d
         quotes.foreach { quote =>
 
-            r.addData(d / numberOfQuotes, quote.getAdjustedClose() / firstClosingPrice)
+            r.addData(d / numberOfQuotes, quote.getAdjustedClose / firstClosingPrice)
             d += 1.0
         }
 
 
-        r.getSlope() >= MINIMUM_SLOPE_OF_TRENDLINE_UPTREND
+        r.getSlope >= MINIMUM_SLOPE_OF_TRENDLINE_UPTREND
     }
 
     /**

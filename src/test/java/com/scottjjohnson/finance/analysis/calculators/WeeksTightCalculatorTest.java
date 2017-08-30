@@ -20,7 +20,7 @@ import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
 import com.scottjjohnson.finance.analysis.beans.WeeklyQuoteBean;
 import com.scottjjohnson.finance.analysis.beans.WeeksTightBean;
 import com.scottjjohnson.finance.analysis.helpers.QuotesHelper;
-import com.scottjjohnson.finance.analysis.parsers.YahooFinanceParser;
+import com.scottjjohnson.finance.analysis.parsers.GoogleFinanceParser;
 import com.scottjjohnson.finance.analysis.testdata.FinanceTestData;
 import com.scottjjohnson.finance.analysis.util.DateParser;
 import org.junit.After;
@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -61,9 +62,9 @@ public class WeeksTightCalculatorTest {
         int correctLength = 3;
         double allowableError = 0.005d;
         double correctBP = 686.15d;
-        double deviation = 0d;
+        double deviation = 0.0d;
 
-        List<WeeklyQuoteBean> quotes = parseJson(FinanceTestData.JSON_WITH_NEW_WT);
+        List<WeeklyQuoteBean> quotes = parse(FinanceTestData.GOOGLE_QUOTES_CSV_CMG_WITH_NEW_WT);
 
         WeeksTightBean wt = new WeeksTightCalculator().scanForWeeksTight(quotes, 100);
 
@@ -86,9 +87,9 @@ public class WeeksTightCalculatorTest {
         int correctLength = 3;
         double allowableError = 0.005d;
         double correctBP = 86.85d;
-        double deviation = 0d;
+        double deviation = 0.0d;
 
-        List<WeeklyQuoteBean> quotes = parseJson(FinanceTestData.JSON_WITH_OLDER_WT);
+        List<WeeklyQuoteBean> quotes = parse(FinanceTestData.GOOGLE_QUOTES_CSV_WLK_WITH_OLDER_WT);
 
         WeeksTightBean wt = new WeeksTightCalculator().scanForWeeksTight(quotes, 100);
 
@@ -111,9 +112,9 @@ public class WeeksTightCalculatorTest {
         int correctLength = 3;
         double allowableError = 0.005d;
         double correctBP = 166.42d;
-        double deviation = 0d;
+        double deviation = 0.0d;
 
-        List<WeeklyQuoteBean> quotes = parseJson(FinanceTestData.JSON_WITH_VERY_OLD_WT);
+        List<WeeklyQuoteBean> quotes = parse(FinanceTestData.GOOGLE_QUOTES_CSV_AGN_WITH_VERY_OLD_WT);
 
         WeeksTightBean wt = new WeeksTightCalculator().scanForWeeksTight(quotes, 100);
 
@@ -136,9 +137,9 @@ public class WeeksTightCalculatorTest {
         int correctLength = 4;
         double allowableError = 0.005d;
         double correctBP = 222.17d;
-        double deviation = 0d;
+        double deviation = 0.0d;
 
-        List<WeeklyQuoteBean> quotes = parseJson(FinanceTestData.JSON_4_WEEK_WT);
+        List<WeeklyQuoteBean> quotes = parse(FinanceTestData.GOOGLE_QUOTES_CSV_AGN_WITH_4_WT);
 
         WeeksTightBean wt = new WeeksTightCalculator().scanForWeeksTight(quotes, 100);
 
@@ -158,7 +159,9 @@ public class WeeksTightCalculatorTest {
     @Test
     public void testScanQuotesForWeeksTightNoWT() {
 
-        List<WeeklyQuoteBean> quotes = parseJson(FinanceTestData.JSON_WITH_SPLIT1);
+        List<WeeklyQuoteBean> quotes = parse(FinanceTestData.GOOGLE_QUOTES_CSV_AAPL_WITH_SPLIT1);
+
+        quotes = quotes.subList(2, quotes.size());
 
         assertNull("Shouldn't find weeks tight for given test data.",
                 new WeeksTightCalculator().scanForWeeksTight(quotes, 4));
@@ -168,10 +171,10 @@ public class WeeksTightCalculatorTest {
     @Test
     public void testScanQuotesForWeeksTightPriorToMaxAge() {
 
-        List<WeeklyQuoteBean> quotes = parseJson(FinanceTestData.JSON_WITH_SPLIT2);
+        List<WeeklyQuoteBean> quotes = parse(FinanceTestData.GOOGLE_QUOTES_CSV_AAPL_WITH_SPLIT2);
 
         assertNull("Shouldn't find weeks tight for given test data.",
-                new WeeksTightCalculator().scanForWeeksTight(quotes, 5));
+                new WeeksTightCalculator().scanForWeeksTight(quotes, 3));
 
     }
 
@@ -181,9 +184,9 @@ public class WeeksTightCalculatorTest {
         int correctLength = 3;
         double allowableError = 0.001d;
         double correctBP = 136.72d;
-        double deviation = 0d;
+        double deviation = 0.0d;
 
-        List<WeeklyQuoteBean> quotes = parseJson(FinanceTestData.JSON_SLXP_SPECIAL_RULE);
+        List<WeeklyQuoteBean> quotes = parse(FinanceTestData.GOOGLE_QUOTES_CSV_SLXP_SPECIAL_RULE);
 
         WeeksTightBean wt = new WeeksTightCalculator().scanForWeeksTight(quotes, 6);
 
@@ -200,12 +203,19 @@ public class WeeksTightCalculatorTest {
                 correctLength, wt.getWeeksTightLength());
     }
 
-    private static List<WeeklyQuoteBean> parseJson(final String json) {
+    private static List<WeeklyQuoteBean> parse(final String csv) {
 
-        List<DailyQuoteBean> dailyQuotes = new YahooFinanceParser(json).parse();
+        List<DailyQuoteBean> dailyQuotes;
+
+        try {
+            dailyQuotes = new GoogleFinanceParser("XXX", csv).parse();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);  // TODO: Fix
+        }
+
         QuotesHelper.sortQuoteListByDate(dailyQuotes);
-        return QuotesHelper.findWeeklyQuotes(dailyQuotes);
 
+        return QuotesHelper.findWeeklyQuotes(dailyQuotes);
     }
 
 }

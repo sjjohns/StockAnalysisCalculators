@@ -25,10 +25,11 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Holds a quote details for a single day. This bean is instantiated and populated by GSON when parsing the YQL response
- * JSON. No setter methods are required. Bean hierarchy: quote history > query > results > daily quote list.
+ * Holds a quote details for a single day.
+ * <p>
+ * Note: open/high/low/close/volume values are adjusted for splits but not dividends. "Adjusted" values are adjusted
+ * for both splits and dividends. (There is no "Adjusted Volume" since dividends have no effect on volume.)
  */
-@edu.umd.cs.findbugs.annotations.SuppressFBWarnings(value = "NM_FIELD_NAMING_CONVENTION", justification = "names must match YQL response.")
 public class DailyQuoteBean implements java.io.Serializable {
 
     private static final long serialVersionUID = -7900749416610148463L;
@@ -44,33 +45,31 @@ public class DailyQuoteBean implements java.io.Serializable {
         }
     };
 
-    // These fields don't meet naming standards because they are named based on Yahoo Finance XML elements. That's
-    // necessary for Gson to be able to automatically populate the bean.
-    private String Symbol;
-    private String Date;
-    private Double Open;
-    private Double High;
-    private Double Low;
-    private Double Close;
-    private Long Volume;
+    private String symbol;
+    private String date;
+    private Double open;
+    private Double high;
+    private Double low;
+    private Double close;
+    private Long volume;
 
     /**
      * closing price adjusted for any stock splits
      */
-    private Double Adj_Close;
+    private Double adjClose;
 
     private Date dateObj;
 
     public String getSymbol() {
-        return Symbol;
+        return symbol;
     }
 
     public Date getDate() {
 
-        if (Date != null && dateObj == null) {
+        if (date != null && dateObj == null) {
 
             try {
-                dateObj = SIMPLE_DATE_FORMAT_WRAPPER.get().parse(Date);
+                dateObj = SIMPLE_DATE_FORMAT_WRAPPER.get().parse(date);
             } catch (ParseException e) {
                 LOGGER.warn("Failed to parse quote date. Full quote bean = {}.", this.toString());
             }
@@ -80,23 +79,23 @@ public class DailyQuoteBean implements java.io.Serializable {
     }
 
     public double getOpen() {
-        return (Open == null ? getAdjustedClose() : Open);
+        return (open == null ? getAdjustedClose() : open);
     }
 
     public double getHigh() {
-        return (High == null ? getAdjustedClose() : High);
+        return (high == null ? getAdjustedClose() : high);
     }
 
     public double getLow() {
-        return (Low == null ? getAdjustedClose() : Low);
+        return (low == null ? getAdjustedClose() : low);
     }
 
     public double getClose() {
-        return (Close == null ? -9999f : Close);
+        return (close == null ? -9999f : close);
     }
 
     public long getVolume() {
-        return (Volume == null ? -9999L : Volume);
+        return (volume == null ? -9999L : volume);
     }
 
     /**
@@ -106,10 +105,10 @@ public class DailyQuoteBean implements java.io.Serializable {
      * @return adjusted high stock price
      */
     public double getAdjustedHigh() {
-        if (Adj_Close != null && Close != null && High != null) {
-            return (Adj_Close / Close * High);
-        } else if (Adj_Close != null && Close != null) {
-            return (Adj_Close); // sometimes Google has only the close, so use it if necessary.
+        if (adjClose != null && close != null && high != null) {
+            return (adjClose / close * high);
+        } else if (adjClose != null && close != null) {
+            return (adjClose); // sometimes Google has only the close, so use it if necessary.
         } else {
             return -9999d;
         }
@@ -122,10 +121,10 @@ public class DailyQuoteBean implements java.io.Serializable {
      * @return adjusted low stock price
      */
     public double getAdjustedLow() {
-        if (Adj_Close != null && Close != null && Low != null) {
-            return (Adj_Close / Close * Low);
-        } else if (Adj_Close != null && Close != null) {
-            return (Adj_Close); // sometimes Google has only the close, so use it if necessary.
+        if (adjClose != null && close != null && low != null) {
+            return (adjClose / close * low);
+        } else if (adjClose != null && close != null) {
+            return (adjClose); // sometimes Google has only the close, so use it if necessary.
         } else {
             return -9999d;
         }
@@ -138,43 +137,43 @@ public class DailyQuoteBean implements java.io.Serializable {
      * @return adjusted closing stock price
      */
     public double getAdjustedClose() {
-        if (Adj_Close != null) {
-            return Adj_Close;
+        if (adjClose != null) {
+            return adjClose;
         } else {
             return -9999d;
         }
     }
 
     public void setSymbol(final String symbol) {
-        Symbol = symbol;
+        this.symbol = symbol;
     }
 
     public void setDate(final String date) {
-        Date = date;
+        this.date = date;
     }
 
     public void setOpen(final double open) {
-        Open = open;
+        this.open = open;
     }
 
     public void setHigh(final double high) {
-        High = high;
+        this.high = high;
     }
 
     public void setLow(final double low) {
-        Low = low;
+        this.low = low;
     }
 
     public void setClose(final double close) {
-        Close = close;
+        this.close = close;
     }
 
     public void setVolume(final long volume) {
-        Volume = volume;
+        this.volume = volume;
     }
 
-    public void setAdjustedClose(final double adj_Close) {
-        Adj_Close = adj_Close;
+    public void setAdjustedClose(final double adjClose) {
+        this.adjClose = adjClose;
     }
 
     public void setDateObj(final Date dateObj) {
@@ -183,8 +182,8 @@ public class DailyQuoteBean implements java.io.Serializable {
 
     @Override
     public String toString() {
-        return "DailyQuoteBean [Symbol=" + Symbol + ", Date=" + Date + ", Open=" + Open + ", High=" + High + ", Low="
-                + Low + ", Close=" + Close + ", Volume=" + Volume + ", Adj_Close=" + Adj_Close + ", dateObj=" + dateObj
+        return "DailyQuoteBean [symbol=" + symbol + ", date=" + date + ", open=" + open + ", high=" + high + ", low="
+                + low + ", close=" + close + ", volume=" + volume + ", adjClose=" + adjClose + ", dateObj=" + dateObj
                 + "]";
     }
 
@@ -195,7 +194,7 @@ public class DailyQuoteBean implements java.io.Serializable {
 
         Date d = getDate();
 
-        result = prime * result + ((Symbol == null) ? 0 : Symbol.hashCode());
+        result = prime * result + ((symbol == null) ? 0 : symbol.hashCode());
         result = prime * result + ((d == null) ? 0 : d.hashCode());
         return result;
     }
@@ -210,10 +209,10 @@ public class DailyQuoteBean implements java.io.Serializable {
             return false;
         DailyQuoteBean other = (DailyQuoteBean) obj;
         Date d = getDate();
-        if (Symbol == null) {
-            if (other.Symbol != null)
+        if (symbol == null) {
+            if (other.symbol != null)
                 return false;
-        } else if (!Symbol.equals(other.Symbol))
+        } else if (!symbol.equals(other.symbol))
             return false;
         if (d == null) {
             if (other.getDate() != null)
