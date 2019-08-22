@@ -20,50 +20,46 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
 
-/**
- * Reads/writes SPX index data suitable for unit testing Pudding calculators.
- */
-public class ComparisonQuotesTestData {
+public class FinanceQuotesTestData {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComparisonQuotesTestData.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FinanceQuotesTestData.class);
 
-    private static final String COMPARISON_QUOTES_FILENAME = "ComparisonQuoteMapTestData.dat";
+    private static final String FINANCE_QUOTES_FILENAME = "FinanceQuoteListTestData.dat";
 
     /**
      * Retrieves test data from a local file. Called by unit tests.
      *
-     * @return Map containing a map of calendar dates to quote beans
+     * @return List containing quote beans
      */
-    public static Map<Date, DailyQuoteBean> getTestData() {
+    public static List<DailyQuoteBean> getTestData() {
 
-        Map<Date, DailyQuoteBean> comparisonQuoteMap = null;
+        List<DailyQuoteBean> quotes = null;
 
         String inputFilenameWithPath = Thread.currentThread()
                                              .getContextClassLoader()
-                                             .getResource(COMPARISON_QUOTES_FILENAME)
+                                             .getResource(FINANCE_QUOTES_FILENAME)
                                              .getPath();
 
         try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(inputFilenameWithPath))) {
-            comparisonQuoteMap = unsafeCastToMap(is.readObject());
+            quotes = unsafeCastToList(is.readObject());
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.error("Failed to read comparison quote test data from input file", e);
+            LOGGER.error("Failed to read test data from input file", e);
         }
 
-        return Collections.unmodifiableMap(comparisonQuoteMap);
+        return Collections.unmodifiableList(quotes);
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<Date, DailyQuoteBean> unsafeCastToMap(final Object o) {
-        if (o instanceof Map<?, ?>) {
-            return (Map<Date, DailyQuoteBean>) o;
+    private static List<DailyQuoteBean> unsafeCastToList(final Object o) {
+        if (o instanceof List<?>) {
+            return (List<DailyQuoteBean>) o;
         } else {
             return null;
         }

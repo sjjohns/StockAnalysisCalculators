@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Scott J. Johnson (http://scottjjohnson.com)
+ * Copyright 2019 Scott J. Johnson (https://scottjjohnson.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,72 +16,54 @@
 
 package com.scottjjohnson.finance.analysis.calculators;
 
-import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
-import com.scottjjohnson.finance.analysis.helpers.QuotesHelper;
-import com.scottjjohnson.finance.analysis.parsers.GoogleFinanceParser;
-import com.scottjjohnson.finance.analysis.testdata.FinanceTestData;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
+import com.scottjjohnson.finance.analysis.testdata.FinanceQuotesTestData;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class AverageTrueRangeCalculatorTest {
 
-    private List<DailyQuoteBean> quotes = null;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AverageTrueRangeCalculatorTest.class);
+
+    private static List<DailyQuoteBean> quotes = null;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+        quotes = FinanceQuotesTestData.getTestData();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
+        quotes = null;
     }
 
     @Before
     public void setUp() throws Exception {
-
-        quotes = new GoogleFinanceParser("XXX", FinanceTestData.GOOGLE_QUOTES_CSV_AAPL_WITH_SPLIT2).parse();
-
-        QuotesHelper.sortQuoteListByDate(quotes);
     }
 
     @After
     public void tearDown() throws Exception {
-        quotes = null;
     }
 
     @Test
     public void testCalculate() {
 
-        double allowableError = 0.0000001d;
-        double correctAnswer = 1.5457143d;
-        double calculatedAnswer = new AverageTrueRangeCalculator().calculate(quotes, 14);
-        double deviation = Math.abs(correctAnswer - calculatedAnswer);
+        double allowableError = 0.01d;
+        double correctAnswer = 4.42d;
+        int period = 40; // market sessions
+        double calculatedAnswer = new AverageTrueRangeCalculator().calculate(quotes, period);
 
-        assertTrue(
-                "calculated Average Percent Range should be " + correctAnswer + " +/- " + allowableError + ", but was "
-                        + calculatedAnswer + " for a deviation of " + deviation + ".", deviation <= allowableError);
-    }
-
-    @Test
-    public void testCalculateUsingSmallQuoteArray() {
-
-        double allowableError = 0.0000001d;
-        double correctAnswer = 1.2433333d;
-
-        quotes = quotes.subList(0, 4); // trim the quotes list to be smaller than the number of days
-
-        double calculatedAnswer = new AverageTrueRangeCalculator().calculate(quotes, 14);
-        double deviation = Math.abs(correctAnswer - calculatedAnswer);
-
-        assertTrue(
-                "calculated Average Percent Range should be " + correctAnswer + " +/- " + allowableError + ", but was "
-                        + calculatedAnswer + " for a deviation of " + deviation + ".", deviation <= allowableError);
+        assertEquals(correctAnswer, calculatedAnswer, allowableError);
     }
 
 }

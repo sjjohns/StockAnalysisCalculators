@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Scott J. Johnson (http://scottjjohnson.com)
+ * Copyright 2019 Scott J. Johnson (https://scottjjohnson.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package com.scottjjohnson.finance.analysis.beans;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.scottjjohnson.util.DateUtils;
 
 /**
  * Holds a quote details for a single day.
@@ -30,35 +33,27 @@ import java.util.Locale;
  * Note: open/high/low/close/volume values are adjusted for splits but not dividends. "Adjusted" values are adjusted
  * for both splits and dividends. (There is no "Adjusted Volume" since dividends have no effect on volume.)
  */
-public class DailyQuoteBean implements java.io.Serializable {
+public class DailyQuoteBean implements Serializable {
 
     private static final long serialVersionUID = -7900749416610148463L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DailyQuoteBean.class);
 
     // SimpleDateFormat is not thread-safe so use a ThreadLocal to give each thread it's own copy
-    protected static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_WRAPPER = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd", new Locale("en", "US"));
-        }
-    };
+    private static final ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_WRAPPER = ThreadLocal.withInitial(
+            () -> new SimpleDateFormat("yyyy-MM-dd", new Locale("en", "US")));
 
     private String symbol;
     private String date;
     private Double open;
     private Double high;
     private Double low;
-    private Double close;
-    private Long volume;
-
-    /**
-     * closing price adjusted for any stock splits
-     */
-    private Double adjClose;
-
+    private Double close = -9999d;
+    private Double change = -9999d;
+    private Double percentChange = -9999d;
+    private Long volume = -9999L;
     private Date dateObj;
+    private Long timestamp;
 
     public String getSymbol() {
         return symbol;
@@ -66,12 +61,16 @@ public class DailyQuoteBean implements java.io.Serializable {
 
     public Date getDate() {
 
-        if (date != null && dateObj == null) {
+        if (dateObj == null) {
+            if (timestamp != null) {
+                dateObj = DateUtils.getMidnightForDate(new Date(timestamp));
+            } else if (date != null) {
 
-            try {
-                dateObj = SIMPLE_DATE_FORMAT_WRAPPER.get().parse(date);
-            } catch (ParseException e) {
-                LOGGER.warn("Failed to parse quote date. Full quote bean = {}.", this.toString());
+                try {
+                    dateObj = SIMPLE_DATE_FORMAT_WRAPPER.get().parse(date);
+                } catch (ParseException e) {
+                    LOGGER.warn("Failed to parse quote date. Full quote bean = {}.", this.toString());
+                }
             }
         }
 
@@ -79,69 +78,31 @@ public class DailyQuoteBean implements java.io.Serializable {
     }
 
     public double getOpen() {
-        return (open == null ? getAdjustedClose() : open);
+        return (open == null ? getClose() : open);
     }
 
     public double getHigh() {
-        return (high == null ? getAdjustedClose() : high);
+        return (high == null ? getClose() : high);
     }
 
     public double getLow() {
-        return (low == null ? getAdjustedClose() : low);
+        return (low == null ? getClose() : low);
     }
 
     public double getClose() {
-        return (close == null ? -9999f : close);
+        return close;
+    }
+
+    public double getChange() {
+        return change;
+    }
+
+    public double getPercentChange() {
+        return percentChange;
     }
 
     public long getVolume() {
-        return (volume == null ? -9999L : volume);
-    }
-
-    /**
-     * Intraday highest stock price for this day adjusted for any subsequent stock splits. (The adjustment also takes
-     * into account dividends which we don't want, but the difference is small for the stocks I'm tracking.)
-     *
-     * @return adjusted high stock price
-     */
-    public double getAdjustedHigh() {
-        if (adjClose != null && close != null && high != null) {
-            return (adjClose / close * high);
-        } else if (adjClose != null && close != null) {
-            return (adjClose); // sometimes Google has only the close, so use it if necessary.
-        } else {
-            return -9999d;
-        }
-    }
-
-    /**
-     * Intraday lowest stock price for this day adjusted for any subsequent stock splits. (The adjustment also takes
-     * into account dividends which we don't want, but the difference is small for the stocks I'm tracking.)
-     *
-     * @return adjusted low stock price
-     */
-    public double getAdjustedLow() {
-        if (adjClose != null && close != null && low != null) {
-            return (adjClose / close * low);
-        } else if (adjClose != null && close != null) {
-            return (adjClose); // sometimes Google has only the close, so use it if necessary.
-        } else {
-            return -9999d;
-        }
-    }
-
-    /**
-     * Closing stock price for this day adjusted for any subsequent stock splits. (The adjustment also takes into
-     * account dividends which we don't want, but the difference is small for the stocks I'm tracking.)
-     *
-     * @return adjusted closing stock price
-     */
-    public double getAdjustedClose() {
-        if (adjClose != null) {
-            return adjClose;
-        } else {
-            return -9999d;
-        }
+        return volume;
     }
 
     public void setSymbol(final String symbol) {
@@ -168,23 +129,31 @@ public class DailyQuoteBean implements java.io.Serializable {
         this.close = close;
     }
 
-    public void setVolume(final long volume) {
-        this.volume = volume;
+    public void setChange(final double change) {
+        this.change = change;
     }
 
-    public void setAdjustedClose(final double adjClose) {
-        this.adjClose = adjClose;
+    public void setPercentChange(final double percentChange) {
+        this.percentChange = percentChange;
+    }
+
+    public void setVolume(final long volume) {
+        this.volume = volume;
     }
 
     public void setDateObj(final Date dateObj) {
         this.dateObj = new Date(dateObj.getTime());
     }
 
+    public void setTimestamp(final long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
-        return "DailyQuoteBean [symbol=" + symbol + ", date=" + date + ", open=" + open + ", high=" + high + ", low="
-                + low + ", close=" + close + ", volume=" + volume + ", adjClose=" + adjClose + ", dateObj=" + dateObj
-                + "]";
+        return "DailyQuoteBean{" + "symbol='" + symbol + '\'' + ", date='" + date + '\'' + ", open=" + open + ", high="
+                + high + ", low=" + low + ", close=" + close + ", change=" + change + ", percentChange=" + percentChange
+                + ", volume=" + volume + ", dateObj=" + dateObj + ", timestamp=" + timestamp + '}';
     }
 
     @Override

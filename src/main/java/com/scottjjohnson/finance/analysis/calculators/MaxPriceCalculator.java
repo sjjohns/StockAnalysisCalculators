@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Scott J. Johnson (http://scottjjohnson.com)
+ * Copyright 2019 Scott J. Johnson (https://scottjjohnson.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-package com.scottjjohnson.finance.analysis.exceptions;
+package com.scottjjohnson.finance.analysis.calculators;
 
-/**
- * Custom exception to hold the details of any parse failure.
- */
-public class ParseException extends Exception {
+import java.util.Comparator;
+import java.util.List;
+
+import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
+
+public class MaxPriceCalculator {
 
     /**
+     * Calculates the highest intraday price for the given quotes
      *
+     * @param quotes List of quotes
+     *
+     * @return max price
      */
-    private static final long serialVersionUID = 5430750784242665175L;
-
-    public ParseException(Exception e) {
-        super(e);
+    public double calculate(List<DailyQuoteBean> quotes) {
+        return quotes.stream().map(DailyQuoteBean::getHigh).max(Comparator.naturalOrder()).orElse(0.0d);
     }
 
-    public ParseException(String string) {
-        super(string);
-    }
-
-    public ParseException(String string, Exception e) {
-        super(string, e);
-    }
 }

@@ -16,7 +16,10 @@
 
 package com.scottjjohnson.finance.analysis.calculators;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -27,24 +30,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.scottjjohnson.finance.analysis.beans.DailyQuoteBean;
+import com.scottjjohnson.finance.analysis.testdata.ComparisonQuotesTestData;
 import com.scottjjohnson.finance.analysis.testdata.FinanceQuotesTestData;
+import com.scottjjohnson.util.DateUtils;
 
 import static org.junit.Assert.assertEquals;
 
-public class MaxPriceCalculatorTest {
+public class BetaCalculatorTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MaxPriceCalculatorTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BetaCalculatorTest.class);
 
     private static List<DailyQuoteBean> quotes = null;
+    private static Map<Date, DailyQuoteBean> comparisonQuotes = null;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         quotes = FinanceQuotesTestData.getTestData();
+        comparisonQuotes = ComparisonQuotesTestData.getTestData();
     }
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
         quotes = null;
+        comparisonQuotes = null;
     }
 
     @Before
@@ -58,11 +66,17 @@ public class MaxPriceCalculatorTest {
     @Test
     public void testCalculate() {
 
-        double allowableError = 0.00d;
-        double correctAnswer = 233.47d;
-        double calculatedAnswer = new MaxPriceCalculator().calculate(quotes);
+        Date lastQuoteDate = quotes.get(quotes.size() - 1).getDate();
+        Date oneYearBeforeLastQuoteDate = DateUtils.addYearsToDate(lastQuoteDate, -1);
+
+        List<DailyQuoteBean> lastYearOfQuotes = quotes.stream()
+                                                      .filter(q -> q.getDate().after(oneYearBeforeLastQuoteDate))
+                                                      .collect(Collectors.toList());
+
+        double allowableError = 0.00002d;
+        double correctAnswer = 1.51303d;
+        double calculatedAnswer = new BetaCalculator().calculate(lastYearOfQuotes, comparisonQuotes);
 
         assertEquals(correctAnswer, calculatedAnswer, allowableError);
     }
-
 }

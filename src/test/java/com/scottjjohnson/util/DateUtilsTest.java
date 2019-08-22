@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Scott J. Johnson (http://scottjjohnson.com)
+ * Copyright 2019 Scott J. Johnson (https://scottjjohnson.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.scottjjohnson.util;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class DateUtilsTest {
 
@@ -46,55 +47,60 @@ public class DateUtilsTest {
     }
 
     @Test
-    public void testGetNextFridayFromSunday() {
-        assertTrue("getNextFriday handles Sunday input.",
-                getTestDate(2014, 7, 25).equals(DateUtils.getNextFriday(getTestDate(2014, 7, 20))));
+    public void testAddYearsToDate() {
+
+        Date inputDate = getTestDate(2017, Calendar.JULY, 19);
+
+        Date calculatedAnswer = DateUtils.addYearsToDate(inputDate, 1);
+        Date correctAnswer = getTestDate(2018, Calendar.JULY, 19);
+
+        assertEquals(calculatedAnswer, correctAnswer);
     }
 
     @Test
-    public void testGetNextFridayFromThursday() {
-        assertTrue("getNextFriday handles Thursday input.",
-                getTestDate(2014, 7, 25).equals(DateUtils.getNextFriday(getTestDate(2014, 7, 24))));
+    public void testAddYearsToDateOverLeapYear() {
+
+        Date inputDate = getTestDate(2015, Calendar.JULY, 19);
+
+        Date calculatedAnswer = DateUtils.addYearsToDate(inputDate, 1);
+        Date correctAnswer = getTestDate(2016, Calendar.JULY, 19);
+
+        assertEquals(calculatedAnswer, correctAnswer);
     }
 
     @Test
-    public void testGetNextFridayFromFriday() {
-        assertTrue("getNextFriday handles Friday input.",
-                getTestDate(2014, 7, 25).equals(DateUtils.getNextFriday(getTestDate(2014, 7, 25))));
+    public void testAddYearsToDateWithNegativeYears() {
+
+        Date inputDate = getTestDate(2015, Calendar.JULY, 19);
+
+        Date calculatedAnswer = DateUtils.addYearsToDate(inputDate, -1);
+        Date correctAnswer = getTestDate(2014, Calendar.JULY, 19);
+
+        assertEquals(calculatedAnswer, correctAnswer);
     }
 
     @Test
-    public void testGetNextFridayFromSaturday() {
-        assertTrue("getNextFriday handles Saturday input.",
-                getTestDate(2014, 7, 25).equals(DateUtils.getNextFriday(getTestDate(2014, 7, 19))));
+    public void testGetMidnightForDate() {
+
+        Date inputDate = getTestDate(2014, Calendar.JULY, 18, 11, 23, 0);
+        Date calculatedAnswer = DateUtils.getMidnightForDate(inputDate);
+        Date correctAnswer = getTestDate(2014, Calendar.JULY, 18);
+
+        assertEquals(correctAnswer, calculatedAnswer);
     }
 
     @Test
-    public void testGetPreviousFridayFromSunday() {
-        assertTrue("getPreviousFriday handles Sunday input.",
-                getTestDate(2014, 7, 18).equals(DateUtils.getPreviousFriday(getTestDate(2014, 7, 20))));
-    }
+    public void testGetMidnightForDateAlreadyMidnight() {
 
-    @Test
-    public void testGetPreviousFridayFromThursday() {
-        assertTrue("getPreviousFriday handles Thursday input.",
-                getTestDate(2014, 7, 18).equals(DateUtils.getPreviousFriday(getTestDate(2014, 7, 24))));
-    }
+        Date inputDate = getTestDate(2014, Calendar.JULY, 18);
+        Date calculatedAnswer = DateUtils.getMidnightForDate(inputDate);
+        Date correctAnswer = getTestDate(2014, Calendar.JULY, 18);
 
-    @Test
-    public void testGetPreviousFridayFromFriday() {
-        assertTrue("getPreviousFriday handles Friday input.",
-                getTestDate(2014, 7, 18).equals(DateUtils.getPreviousFriday(getTestDate(2014, 7, 18))));
-    }
-
-    @Test
-    public void testGetPreviousFridayFromSaturday() {
-        assertTrue("getPreviousFriday handles Saturday input.",
-                getTestDate(2014, 7, 18).equals(DateUtils.getPreviousFriday(getTestDate(2014, 7, 19))));
+        assertEquals(correctAnswer, calculatedAnswer);
     }
 
     /**
-     * Utility method to build a date object.
+     * Utility method to build a date object for midnight.
      *
      * @param year  year
      * @param month month
@@ -102,7 +108,24 @@ public class DateUtilsTest {
      *
      * @return Date representing the year/month/day
      */
-    public Date getTestDate(int year, final int month, final int day) {
-        return new GregorianCalendar(year, month - 1, day).getTime();
+    private Date getTestDate(int year, final int month, final int day) {
+        return getTestDate(year, month, day, 0, 0, 0);
+    }
+
+    /**
+     * Utility method to build a date object with hour/minute/seconds.
+     *
+     * @param year    year
+     * @param month   month
+     * @param day     day
+     * @param hours   hours
+     * @param minutes minutes
+     * @param seconds seconds
+     *
+     * @return Date representing the year/month/day
+     */
+    private Date getTestDate(int year, final int month, final int day, final int hours, final int minutes,
+            final int seconds) {
+        return new GregorianCalendar(year, month, day, hours, minutes, seconds).getTime();
     }
 }

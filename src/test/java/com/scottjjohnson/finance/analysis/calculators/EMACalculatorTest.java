@@ -31,9 +31,9 @@ import com.scottjjohnson.finance.analysis.testdata.FinanceQuotesTestData;
 
 import static org.junit.Assert.assertEquals;
 
-public class MaxPriceCalculatorTest {
+public class EMACalculatorTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MaxPriceCalculatorTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EMACalculatorTest.class);
 
     private static List<DailyQuoteBean> quotes = null;
 
@@ -56,11 +56,29 @@ public class MaxPriceCalculatorTest {
     }
 
     @Test
-    public void testCalculate() {
+    public void testCalculateEMAFromQuoteList() {
 
-        double allowableError = 0.00d;
-        double correctAnswer = 233.47d;
-        double calculatedAnswer = new MaxPriceCalculator().calculate(quotes);
+        double allowableError = 0.01d;
+        double correctAnswer = 205.42d;
+        int period = 21; // market sessions
+        double calculatedAnswer = new EMACalculator().calculate(quotes, period);
+
+        assertEquals(correctAnswer, calculatedAnswer, allowableError);
+    }
+
+    @Test
+    public void testCalculateFromPreviousEMA() {
+
+        double allowableError = 0.01d;
+        double correctAnswer = 205.42d;
+        int period = 21; // market sessions
+
+        EMACalculator calc = new EMACalculator();
+
+        double calculatedAnswer = 0;
+        for (DailyQuoteBean quote : quotes) {
+            calculatedAnswer = calc.calculate(calculatedAnswer, quote.getClose(), period);
+        }
 
         assertEquals(correctAnswer, calculatedAnswer, allowableError);
     }
