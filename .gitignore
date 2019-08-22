@@ -1,0 +1,10 @@
+.DS_Store
+.settings
+target
+*.csv
+input/*
+output/*
+out/*
+logs/*
+/.cache-main
+/.cache-tests

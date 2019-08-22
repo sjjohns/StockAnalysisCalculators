@@ -3,10 +3,12 @@ Stock Analysis Calculators is a Java library for calculating certain technical m
 Metrics include:
 
 * Simple Moving Averages
+* Exponential Moving Averages
 * Average True Range (ATR) 
 * Average Share Volume
+* Beta
+* Max Price (useful for determining 52-week high)
 * Up/Down Volume Ratio
-* Weeks Tight Patterns and Buy Points
 * Relative Strength Percent of Peak
 
 The complete source code is available on GitHub: 
